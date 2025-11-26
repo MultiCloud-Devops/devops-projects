@@ -1,0 +1,131 @@
+Installing Java
+---------------
+sudo apt update
+sudo apt install fontconfig openjdk-17-jre
+java -version
+
+Installing Docker
+-----------------
+sudo apt update -y
+sudo apt install apt-transport-https ca-certificates curl software-properties-common -y
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" -y
+sudo apt update -y
+apt-cache policy docker-ce
+sudo apt install docker-ce -y
+sudo systemctl status docker
+
+Installing Maven
+----------------
+sudo apt-get install -y maven
+
+Installing Trivy
+----------------
+sudo apt-get install wget apt-transport-https gnupg lsb-release
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update
+sudo apt-get install trivy
+
+Installing Jenkins
+------------------
+sudo wget -O /usr/share/keyrings/jenkins-keyring.asc https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+echo "deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc]" https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt-get update
+sudo apt-get install jenkins -y
+
+Adding users to jenkins group
+-----------------------------
+sudo usermod -aG sudo jenkins
+sudo usermod -aG docker jenkins
+
+AWS IAM Role
+------------
+In AWS account create an IAM role with S3 full access permissions and attach it to Jenkins machine.
+
+Jenkins Plugins:
+----------------
+Pipeline: Stage View
+Blue Ocean
+Parameterized Trigger
+Slack Notification
+
+Slack app api:
+--------------
+PluginSlackNotifier
+
+Jenkins Credential:
+-------------------
+slackcred
+
+
+GitHub Token
+------------
+ 
+My-git-token:
+-------------
+ 
+
+
+Shiva sir github:
+-----------------
+ 
+
+
+Configuring Jenkins Pipeline With Slack
+---------------------------------------
+Pre Requirements
+----------------
+1) Install Slack Notification plugin.
+
+1) Visit https://api.slack.com/apps.
+2) Click "Create New App". Select "From scratch"
+3) Provide "App Name". Select workspace.
+4) In left menu select OAuth & Permissions.
+5) Scroll down to "Scopes". Add following scopes.
+   a) chat:write
+   b) chat:write.public
+   c) channels:read
+6) Scroll above to OAuth Tokens. Click on "Install to <workspace>" option.
+7) Select channel and click on install.
+😍 Copy the user token generated.
+9) Configure this user token as secret text in jenkins credentials section.
+10) Click on setting on jenkins. Click on "System".
+11) Scroll down to "Slack".
+12) Provide workspace name, Select credential and provide channel name.
+13) Click on "Custom slack app bot user".
+14) Test the connection by clicking on "Test Connection" option.
+15) Add below post build actions to the pipeline.
+pipeline {
+     post {
+        success {
+            slackSend channel: '#alerting',
+                      color: 'good',
+                      message: "✔️ SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER} completed successfully."
+        }
+
+        failure {
+            slackSend channel: '#alerting',
+                      color: 'danger',
+                      message: "❌ FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER} failed.\nCheck console output: ${env.BUILD_URL}"
+        }
+
+        unstable {
+            slackSend channel: '#alerting',
+                      color: 'warning',
+                      message: "⚠️ UNSTABLE: ${env.JOB_NAME} #${env.BUILD_NUMBER} returned unstable status."
+        }
+
+        aborted {
+            slackSend channel: '#alerting',
+                      color: '#808080',
+                      message: "⛔ ABORTED: ${env.JOB_NAME} #${env.BUILD_NUMBER} was aborted."
+        }
+
+        always {
+            slackSend channel: '#alerting',
+                      color: '#439FE0',
+                      message: "ℹ️ Build finished: `${env.JOB_NAME} #${env.BUILD_NUMBER}`"
+        }
+    }
+}

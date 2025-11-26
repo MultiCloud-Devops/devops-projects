@@ -1,0 +1,52 @@
+---
+services:
+  compose-mydb:
+    container_name: compose-mydb
+    image: mysql
+    environment:
+       MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - datastore
+  
+  compose-be-app:
+    container_name: compose-be-app
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_HOST: ${MYSQL_CON_HOST}
+      MYSQL_USERNAME: ${MYSQL_UNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWD}
+    links:
+      - compose-mydb
+    depends_on:
+      compose-mydb:
+        condition: service_healthy
+    networks:
+      - datastore
+  
+  compose-fe-app:
+    container_name: compose-fe-app
+    build:
+      context: "D:/NIT/Devops With MultiCloud/git/git-repos/JRP-OCT/Project-3-Docker/DataStoreFront"
+      dockerfile: Dockerfile
+    environment:
+      - API_URL=http://compose-be-app:8084
+    links:
+      - compose-be-app
+    networks:
+      - datastore
+    depends_on:
+      - compose-be-app
+    ports:
+      - 85:8080
+networks:
+  datastore:
+    driver: bridge
+
+

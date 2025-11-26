@@ -1,0 +1,25 @@
+kubectl apply -n monitoring -f - <<'EOF'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-server
+  namespace: monitoring
+data:
+  alerting_rules.yml: |
+    groups:
+    - name: datastore-app
+      rules:
+      - alert: InstanceDown
+        expr: (absent(up{service="datastore-backend-svc"}) == 1) or (up{service="datastore-backend-svc"} == 0)
+        for: 5s
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "Application is down."
+          description: "Application is not reachable. Contact DevOps team."
+EOF
+
+# reload by restarting Prometheus pod (or use /-/reload if configured)
+kubectl get pods -n monitoring
+kubectl delete pod <prometheus-pod-name> -n monitoring

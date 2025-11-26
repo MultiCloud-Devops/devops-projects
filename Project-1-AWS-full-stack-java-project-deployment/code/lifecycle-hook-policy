@@ -1,0 +1,17 @@
+Hook Policy
+-----------
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:CompleteLifecycleAction",
+        "autoscaling:DescribeAutoScalingInstances",
+        "autoscaling:DescribeLifecycleHooks",
+        "autoscaling:DescribeAutoScalingGroups"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

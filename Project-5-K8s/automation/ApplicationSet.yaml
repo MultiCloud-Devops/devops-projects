@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: datastore-app-set
+  namespace: argocd
+spec:
+  generators:
+    - merge:
+        mergeKeys: [ "path.basename" ]
+        generators:
+          - git:
+              repoURL: https://github.com/MultiCloud-Devops/datastore-argocd-applications.git
+              revision: main
+              directories:
+                - path: datastore-be
+                - path: datastore-fe
+          - list:
+              elements:
+                - namespace: backend
+                  path.basename: datastore-be
+                - namespace: frontend
+                  path.basename: datastore-fe
+  template:
+    metadata:
+      name: '{{path.basename}}' # Dynamically generated application name
+    spec:
+      project: default # ArgoCD project (make sure this project exists)
+      source:
+        repoURL: https://github.com/MultiCloud-Devops/datastore-Kubernetes.git # Kubernetes manifests repository
+        targetRevision: main # Git branch to track
+        path: '{{path.basename}}' # Dynamically point to subdirectory in Kubernetes.git
+      destination:
+        server: https://kubernetes.default.svc # Use the in-cluster Kubernetes API URL
+        namespace: '{{namespace}}' # '{{path.basename}}' # Use directory basename (e.g., `mysql`, `wordpress`) as namespace
+      syncPolicy:
+        automated:
+          prune: true # Automatically delete resources not in Git repo
+          selfHeal: true # Automatically fix discrepancies
+        syncOptions:
+          - CreateNamespace=true

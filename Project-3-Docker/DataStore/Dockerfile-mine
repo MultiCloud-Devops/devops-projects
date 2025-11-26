@@ -1,0 +1,11 @@
+FROM amazoncorretto:11-alpine-jdk as builder
+WORKDIR /app/DS/
+RUN apk add --no-cache maven bash curl
+COPY . .
+RUN mvn clean package -DskipTests
+
+FROM amazoncorretto:11-alpine-jdk
+COPY --from=builder /app/DS/target/*.jar /app/app.jar
+CMD ["java", "-jar", "app/app.jar", "--server.port=8084"]
+
+

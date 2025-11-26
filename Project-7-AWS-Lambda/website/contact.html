@@ -1,0 +1,41 @@
+<!-- contact.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact – MyProduct</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container nav-content">
+      <div class="logo">MyProduct</div>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="container page-section contact-section">
+    <h1>Contact Us</h1>
+    <p>Send your message below and we’ll get back to you.</p>
+
+    <form class="contact-form" onsubmit="return handleSubmit(event)">
+      <label>Name<br><input type="text" required></label>
+      <label>Email<br><input type="email" required></label>
+      <label>Message<br><textarea rows="5" required></textarea></label>
+      <button class="btn primary">Send</button>
+      <p id="formStatus"></p>
+    </form>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>© 2025 MyProduct</p>
+    </div>
+  </footer>
+</body>
+</html>

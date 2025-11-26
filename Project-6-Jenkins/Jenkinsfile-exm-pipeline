@@ -1,0 +1,62 @@
+pipeline {
+    agent {
+        label 'datastore-be-node'
+    }
+    
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        string(name: 'test', description: 'test')
+    }
+    
+    environment{
+        data = credentials('testid')
+    }
+
+    stages {
+        stage('first') {
+            steps {
+                sh """
+                    echo "test: ${test}"
+                """
+            }
+        }
+
+        stage('second') {
+            when {
+                expression { test == 'sss' }
+            }
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    sh """
+                        pwd
+                    """
+                }
+            }
+        }
+        stage('third') {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh """
+                        echo "---------credentials-------"
+                        echo "$data_USR $data_PSW"
+                        echo "$BUILD_URL"
+                    """
+                }
+            }
+        }
+        stage('fourth'){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'testid', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                        echo "---------withCredentials-------"
+                        echo "$USER $PASS"
+                    """
+                }
+            }
+        }
+    }
+}

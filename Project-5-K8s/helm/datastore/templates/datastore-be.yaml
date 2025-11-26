@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datastore-backend
+  labels:
+    type: backend
+  namespace: backend
+spec:
+  {{- with .Values.datastore.datastoreBackend }}
+  template:
+    metadata:
+      name: datastore-backend
+      labels:
+        type: backend
+    spec:
+      containers:
+        - name: datastore-backend
+          image: 8072388539/datastore:{{ .imgTag }}
+          env:
+            - name: MYSQL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: datastore-be-cm
+                  key: mysqlHost
+            - name: MYSQL_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: datastore-be-cm
+                  key: mysqlUname
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: datastore-be-secret
+                  key: mysqlPassword
+          resources:
+          {{- toYaml .containerResources | nindent 12 }}
+          livenessProbe:
+          {{- toYaml .healthChecks.livenessProbe | nindent 12 }}
+          readinessProbe:
+          {{- toYaml .healthChecks.readinessProbe | nindent 12 }}
+          startupProbe:
+          {{- toYaml .healthChecks.startupProbe | nindent 12 }}
+  replicas: {{ .replicaCount }}
+  selector:
+    matchLabels:
+      type: backend
+  {{- end }}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: datastore-backend-svc
+  namespace: backend
+  annotations:
+    prometheus.io/path: /actuator/prometheus
+    prometheus.io/scrape: "true"
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8084
+  selector:
+    type: backend

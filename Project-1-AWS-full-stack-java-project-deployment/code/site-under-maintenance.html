@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Site Under Maintenance</title>
+
+<!-- Google font (optional) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg1: #ff6b6b;
+    --bg2: #ff9a6b;
+    --bg3: #ffd56b;
+    --card: rgba(255,255,255,0.92);
+    --muted: #556;
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
+    background-size: 400% 400%;
+    animation: bgShift 14s ease-in-out infinite;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  @keyframes bgShift {
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+
+  .wrap{
+    width:min(920px,94%);
+    display:grid;
+    grid-template-columns: 1fr 320px;
+    gap:28px;
+    align-items:center;
+    position:relative;
+  }
+
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), var(--card));
+    padding:36px;
+    border-radius:18px;
+    box-shadow: 0 10px 30px rgba(17,24,39,0.18);
+    backdrop-filter: blur(6px);
+  }
+
+  .logo {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:8px;
+  }
+
+  .dot {
+    width:48px;
+    height:48px;
+    border-radius:12px;
+    display:inline-grid;
+    place-items:center;
+    font-weight:800;
+    color:#fff;
+    font-size:20px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    background: linear-gradient(135deg, #6b73ff, #000dff);
+  }
+
+  h1{
+    margin:6px 0 10px 0;
+    font-size:26px;
+    letter-spacing:-0.3px;
+    color: #0d1b2a;
+  }
+
+  p.lead{
+    margin:0 0 18px 0;
+    color:var(--muted);
+    line-height:1.45;
+  }
+
+  .badges{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:14px;
+  }
+
+  .badge{
+    background:transparent;
+    border:1px solid rgba(13,27,42,0.06);
+    padding:8px 12px;
+    border-radius:999px;
+    font-weight:600;
+    font-size:13px;
+    color:#102030;
+    box-shadow: 0 4px 10px rgba(16,32,48,0.06);
+  }
+
+  .right{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .sunburst{
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background: conic-gradient(from 90deg, #ff9a6b, #ffd56b, #6bffcf, #6b73ff, #ff6b6b);
+    box-shadow: 0 18px 35px rgba(0,0,0,0.12);
+    animation: rotate 8s linear infinite;
+    position:relative;
+  }
+
+  @keyframes rotate { to { transform: rotate(360deg); } }
+
+  .sunburst .inner{
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:linear-gradient(180deg,#fff,rgba(255,255,255,0.92));
+    display:grid;
+    place-items:center;
+    font-size:18px;
+    font-weight:700;
+    color:#0b2340;
+    box-shadow: 0 10px 30px rgba(11,35,64,0.08);
+  }
+
+  /* Floating confetti */
+  .confetti{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:0;
+  }
+
+  .confetti span{
+    position:absolute;
+    display:block;
+    width:10px;
+    height:14px;
+    opacity:0.95;
+    transform-origin:center;
+    border-radius:2px;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    0%{transform: translateY(-10vh) rotate(0) scale(1); opacity:0}
+    10%{opacity:1}
+    100%{transform: translateY(120vh) rotate(720deg) scale(.9); opacity:0.9}
+  }
+
+  footer.note{
+    margin-top:18px;
+    font-size:13px;
+    color:#314556;
+  }
+
+  /* Responsive */
+  @media (max-width:820px){
+    .wrap{ grid-template-columns: 1fr; gap:18px; }
+    .right{ order:-1; }
+    .sunburst{ width:200px; height:200px; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-labelledby="maintitle">
+    <div class="card" aria-hidden="false">
+      <div class="logo" aria-hidden="true">
+        <div class="dot">K</div>
+        <div>
+          <div style="font-weight:800; color:#0b2340;">datastore.krishnal.shop</div>
+          <div style="font-size:12px; color:#6b7280;">Scheduled maintenance</div>
+        </div>
+      </div>
+
+      <h1 id="maintitle">We'll be back soon — making things better ✨</h1>
+      <p class="lead">
+        We're performing scheduled updates to improve performance and add new features.
+        The site is temporarily unavailable — but we won't be gone long. Thanks for your patience.
+      </p>
+
+      <div class="badges" role="list">
+        <div class="badge" role="listitem">Estimated downtime: ~30 min</div>
+        <div class="badge" role="listitem">Status: Maintenance</div>
+        <div class="badge" role="listitem">Support: hello@krishnal.shop</div>
+      </div>
+
+      <footer class="note" aria-hidden="false">
+        Tip: refresh in a few minutes. If you need urgent access, email support above.
+      </footer>
+    </div>
+
+    <div class="right" aria-hidden="true">
+      <figure class="sunburst" aria-hidden="true" title="Maintenance">
+        <div class="inner">Under Maintenance</div>
+      </figure>
+    </div>
+
+    <!-- Decorative confetti -->
+    <div class="confetti" aria-hidden="true" id="confetti">
+      <!-- JS will fill this -->
+    </div>
+  </div>
+
+<script>
+  // Create lightweight confetti animation (pure JS so single file)
+  (function createConfetti(){
+    const parent = document.getElementById('confetti');
+    const colors = ['#FF6B6B','#FF9A6B','#FFD56B','#6BFFCF','#6B73FF','#9A6BFF'];
+    const count = 18;
+    for(let i=0;i<count;i++){
+      const s = document.createElement('span');
+      const left = Math.random()*100;
+      const delay = Math.random()*6;
+      const duration = 6 + Math.random()*6;
+      const size = 8 + Math.random()*14;
+      s.style.left = left + '%';
+      s.style.top = (Math.random()*-20)+'vh';
+      s.style.width = size + 'px';
+      s.style.height = (size + Math.random()*6) + 'px';
+      s.style.background = colors[Math.floor(Math.random()*colors.length)];
+      s.style.borderRadius = (Math.random()*6) + 'px';
+      s.style.opacity = 0.95;
+      s.style.animationDuration = duration+'s';
+      s.style.animationDelay = delay+'s';
+      parent.appendChild(s);
+    }
+  })();
+</script>
+</body>
+</html>

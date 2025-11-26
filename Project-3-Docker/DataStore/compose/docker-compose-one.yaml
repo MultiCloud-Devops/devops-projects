@@ -1,0 +1,49 @@
+---
+version: "3"
+services:
+  mydb:
+    container_name: mydb
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: shivakumar
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - datastore
+  be-app:
+    container_name: be-app
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    environment:
+      MYSQL_HOST: "jdbc:mysql://mydb:3306/datastore?createDatabaseIfNotExist=true"
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: shivakumar
+    links:
+      - mydb
+    depends_on:
+      mydb:
+        condition: service_healthy
+    networks:
+      - datastore
+  fe-app:
+    container_name: fe-app
+    build:
+      context: /Users/shivakumar/Documents/app_projects/python_projects/DataStoreFront/
+      dockerfile: Dockerfile-frontend
+    environment:
+      API_URL: http://be-app:8084
+    ports:
+      - 8787:8080
+    links:
+      - be-app
+    depends_on:
+      - be-app
+    networks:
+      - datastore
+networks:
+  datastore:
+    driver: bridge

@@ -1,0 +1,77 @@
+pipeline{
+    agent any
+
+    parameters{
+        string(name: "App_Version", description: "provide application version") 
+    }
+    envvironment{
+        DOCKERHUB_CREDENTIALS=credentials("dockerhub")
+    }
+    stages{
+        stage("Repo Clone"){
+            steps{
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: '']]))
+            }
+        }
+    }
+    stage("Docker Image Build") {
+      steps {
+        sh """
+          echo "-------- Building Docker Image --------"
+          docker build -t datastore-frontend:"${App_Version}" .
+          echo "-------- Image Successfully Built --------"
+        """
+      }
+    }
+    stage("Docker Image Scan") {
+      steps {
+        sh """
+          echo "-------- Scanning Docker Image --------"
+          trivy image datastore-frontend:"${App_Version}"
+          echo "-------- Scanning Docker Image Complete --------"
+        """
+      }
+    }
+    stage("Docker Image Tag") {
+      steps{
+        sh """
+          echo "-------- Tagging Docker Image --------"
+          docker tag datastore-frontend:"${App_Version}" krishnaurs2022/datastore-frontend:"${App_Version}"
+          echo "-------- Tagging Docker Image Completed."
+        """
+      }
+    }
+    stage("Loggingin & Pushing Docker image") {
+      steps {
+        sh """
+          echo "-------- Logging To DockerHub --------"
+          docker login -u $DOCKERHUB_CREDENTIALS_USR --password $DOCKERHUB_CREDENTIALS_PSW
+          echo "-------- DockerHub Login Successful --------"
+
+          echo "-------- Pushing Docker Image To DockerHub --------"
+          docker push krishnaurs2022/datastore-frontend:"${App_Version}"
+          echo "-------- Docker Image Pushed Successfully --------"
+        """
+      }
+    }
+    stage("cleanup") {
+      steps {
+        sh """
+           echo "-------- Cleaning Up Jenkins Machine --------"
+           docker image prune -a -f
+           echo "-------- Clean Up Successful --------"
+        """
+      }
+    }
+    stage("Deployment Acceptance") {
+      steps {
+        input 'Trigger Down Stream Job'
+      }
+    }
+    stage("Triggering Deployment Job") {
+      steps {
+        build job: "KubernetesDeployment", parameters: [string(name: "App_Name", value: "datastore-froneend-deploy"), string(name: "App_Version", value: "${params.App_Version}")]
+      }
+    }
+
+}

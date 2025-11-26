@@ -1,0 +1,67 @@
+datastore:v35.0 image is for backend contains /actuator/prometheus api to fetch the metrics.
+datastore-frontend:v35.0 image is for frontend.
+
+Pre Requirements
+----------------
+Step - 1 : Create a namespace called monitoring.
+kubectl create namespace monitoring
+
+Prometheus Deployment
+---------------------
+Step - 2 : Install prometheus to K8S cluster.
+helm upgrade --install prometheus prometheus-community/prometheus \
+  --namespace monitoring \
+  --create-namespace \
+  --set alertmanager.persistentVolume.storageClass="ebs-persistent-store" \
+  --set server.persistentVolume.storageClass="ebs-persistent-store" \
+  --set alertmanager.persistentVolume.size=2Gi \
+  --set server.persistentVolume.size=8Gi
+
+
+---no---
+helm install prometheus prometheus-community/prometheus --namespace monitoring --set server.persistentVolume.storageClass="ebs-persistent-store" --set alertmanager.persistence.enabled=false
+
+kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+Step - 3 : Port forward to the prometheus server.
+kubectl port-forward svc/prometheus-server 9090:80 -n monitoring
+
+Grafana Deployment
+------------------
+Step - 1 : Install grafana to K8S cluster.
+helm install grafana grafana/grafana \
+  --namespace monitoring \
+  --set persistence.storageClassName="ebs-persistent-store" \
+  --set persistence.enabled=true \
+  --set adminPassword='ShivaKumar'
+
+Step - 2 : Port forward to the grafana server.
+kubectl port-forward svc/grafana 3000:3000 -n monitoring
+
+Here are some promql queries
+----------------------------
+http_server_requests_seconds_count
+node_cpu_seconds_total
+
+Number of pods running per namespace.
+sum(kube_pod_status_phase) by (namespace)
+count(kube_pod_status_phase{phase="Running"})
+sum(kube_pod_status_ready{namespace="monitoring", condition="true"})
+
+Pod CPU Usage (per pod)
+sum(rate(container_cpu_usage_seconds_total{image!="", pod!=""}[5m])) by (pod, namespace)
+
+Pod Memory Usage (per pod)
+sum(container_memory_usage_bytes{image!="", pod!=""}) by (pod, namespace)
+
+CPU Usage Across All Cores for nodes
+100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance) * 100)
+
+Memory Usage Percentage for nodes
+(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100
+
+Disk Usage Percentage
+(node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} - node_filesystem_free_bytes{fstype!~"tmpfs|overlay"}) / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"} * 100
+
+Disk Space Availablility
+node_filesystem_free_bytes{fstype!~"tmpfs|overlay"Disk

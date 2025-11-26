@@ -1,0 +1,87 @@
+### monitoring - architecture-3
+
+---
+
+### Grafana deploy
+
+---
+
+- install grafana to k8s cluster
+- helm command
+- kubectl get pod -n monitoring
+- kubectl get svc -n monitoring
+- kubectl port-forward svc/grafana -p _____ -n monitoring
+- login to grafana dashboard
+- connection → add → add data source → prometheus
+- connection URL → FQDN for grafana prometheus connection
+- kubectl get svc -n monitoring
+- http://promethues-server.monitoring.svc.cluster.local:80
+- save and test
+- [ ]  grafana dashboard image
+- dashboards
+    - create dashboard
+    - add visualization
+    - dashboards → panels → data source for it
+    - save dashboard
+    - panel → node level
+        - query
+        - gaure
+        - name = node cpu util
+        - add messsage - added node cpu util
+        - 
+    - new panel → node level
+        - query - disk space usage percentage
+        - stat
+        - name = Node Disk util
+        - message - Node disl cpu util panel added
+    - add row
+        - title = pods
+        - new row , title = nodes
+        - shift panel to rows
+- new dashboard
+    - grafana dsachbaord
+    - imoprt bashboard nodeexporter full
+    - add no 1860
+    - import
+- we have 2 dashboards
+- create Playlist → dashboard →
+    
+    name = prod-playlist
+    
+    interval = 5
+    
+    add lists
+    
+    switching dasboards on screen
+    
+- share playlist → URL → use url in browser
+
+---
+
+- [ ]  grafana SS
+
+### Prometheus dashboard things - alerting
+
+---
+
+- update alerting_rules.yml
+- kubectl get svc -n monitoring
+- kubectl port-forward svc/prometheus-alertmanager pr 9393:9093 -n monitoring
+- access → localhost:9393
+- alert comes → takes time
+- kubectl get cm -n monitoring
+- kubectl edit cm promethues-sercer -n monitoring
+- first block, second block - alerting, change slack webhook url
+- add code
+- reload alert manager
+- curl -X —
+- access  → localhost:9393
+- check slack channel
+- kubectl get po - monitoring
+- kubectl logs
+- code syntax error
+- make application up → probe code correct
+
+---
+
+---

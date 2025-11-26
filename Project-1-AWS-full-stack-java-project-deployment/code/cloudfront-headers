@@ -1,0 +1,8 @@
+Cloudfront Headers
+------------------
+You need to add following headers to cloudfront default behaviour.
+- Origin
+- Sec-WebSocket-Key
+- Sec-WebSocket-Version
+- Host
+- Sec-WebSocket-Extensions

@@ -1,0 +1,45 @@
+Step - 1 : Update the below configuration in prometheus-server configmap.
+  alerting_rules.yml: |
+    groups:
+    - name: datastore-app
+      rules:
+      - alert: InstanceDown
+        expr: up{service="datastore-backend-svc"} == 0
+        for: 5s
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "Application is down."
+          description: "Application is not reachable. Contact DevOps team."
+
+Step - 2 : Update the below two configuration blocks in alertmanager configmap.
+  First Block:
+  This block defines where to send the notifications.
+      receivers:
+      - name: default-receiver
+      - name: slack
+        slack_configs:
+        - channel: "#alerting"
+          text: |
+            {{ .CommonAnnotations.summary }}
+            {{ .CommonAnnotations.description }}
+          send_resolved: true
+          api_url: ''
+
+  Second Block:
+  This block defines in which case where to send notifications. For example for below case if team, severity matches with devops, critical then it will send the notification to slack receiver which we added in above configuration if not to default receiver which is empty.
+      route:
+        group_interval: 5m
+        group_wait: 10s
+        receiver: default-receiver
+        repeat_interval: 3h
+        routes:
+        - matchers:
+          - team=~"devops"
+          - severity="critical"
+          receiver: slack
+          continue: true
+
+  Reload the alert manager after updating the configmap of alertmanager with below curl. Update the port based on service port mapping port.
+  curl -X POST http://localhost:9393/-/reload

@@ -1,0 +1,152 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: "App_Version", description: "Provide application version")
+    }
+
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials("dockerhub")
+    }
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+    }
+
+    stages {
+
+        /* =============================
+           STAGE 1: GIT CLONE (Fail Fast)
+           ============================= */
+        stage("Repo Clone") {
+            steps {
+                checkout([$class: 'GitSCM',
+                    branches: [[name: "*/main"]],
+                    userRemoteConfigs: [[url: "<YOUR_REPOSITORY_URL>"]]
+                ])
+            }
+        }
+
+        /* ============================================
+           STAGE 2: DOCKER BUILD (Fail Fast - Critical)
+           ============================================ */
+        stage("Docker Image Build") {
+            steps {
+                sh """
+                echo "-------- Building Docker Image --------"
+                docker build -t datastore-frontend:${App_Version} .
+                echo "-------- Image Successfully Built --------"
+                """
+            }
+        }
+
+        /* ==================================
+           STAGE 3: SECURITY SCAN (Soft Fail)
+           ================================== */
+        stage("Docker Image Scan") {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh """
+                    echo "-------- Scanning Docker Image --------"
+                    trivy image datastore-frontend:${App_Version}
+                    echo "-------- Scanning Docker Image Complete --------"
+                    """
+                }
+            }
+        }
+
+        /* ================================
+           STAGE 4: TAG (Fail Fast)
+           ================================ */
+        stage("Docker Image Tag") {
+            steps {
+                sh """
+                echo "-------- Tagging Docker Image --------"
+                docker tag datastore-frontend:${App_Version} \
+                    krishnaurs2022/datastore-frontend:${App_Version}
+                echo "-------- Tagging Completed --------"
+                """
+            }
+        }
+
+        /* ============================================
+           STAGE 5: LOGIN & PUSH (Fail Fast - Critical)
+           ============================================ */
+        stage("Docker Push") {
+            steps {
+                sh """
+                echo "-------- Logging to DockerHub --------"
+                docker login -u $DOCKERHUB_CREDENTIALS_USR -p $DOCKERHUB_CREDENTIALS_PSW
+
+                echo "-------- Pushing Docker Image --------"
+                docker push krishnaurs2022/datastore-frontend:${App_Version}
+                echo "-------- Docker Image Pushed Successfully --------"
+                """
+            }
+        }
+
+        /* ==================================
+           STAGE 6: CLEANUP (Non-critical)
+           ================================== */
+        stage("Cleanup") {
+            steps {
+                catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                    sh """
+                    echo "-------- Cleaning Jenkins Environment --------"
+                    docker image prune -a -f
+                    echo "-------- Cleanup Complete --------"
+                    """
+                }
+            }
+        }
+
+        /* =============================================
+           STAGE 7: OPTIONAL USER APPROVAL (Soft-Fail)
+           ============================================= */
+        stage("Deployment Acceptance") {
+            steps {
+                script {
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE') {
+                        input "Approve deployment to Kubernetes?"
+                    }
+                }
+            }
+        }
+
+        /* ============================================================
+           STAGE 8: DEPLOYMENT JOB TRIGGER (Only if pipeline not unstable)
+           ============================================================ */
+        stage("Trigger Deployment Job") {
+            when {
+                expression { currentBuild.result == null || currentBuild.result == 'SUCCESS' }
+            }
+            steps {
+                build job: "KubernetesDeployment",
+                    parameters: [
+                        string(name: "App_Name", value: "datastore-frontend-deploy"),
+                        string(name: "App_Version", value: params.App_Version)
+                    ]
+            }
+        }
+
+    } // stages end
+
+    /* ============================
+       POST BUILD RESULT NOTICES
+       ============================ */
+    post {
+        success {
+            echo "🎉 Pipeline Completed Successfully!"
+        }
+        unstable {
+            echo "⚠️ Pipeline completed with warnings (scan or cleanup issues)."
+        }
+        failure {
+            echo "❌ Pipeline Failed — check logs for details."
+        }
+        always {
+            echo "Pipeline finished with status: ${currentBuild.currentResult}"
+        }
+    }
+}

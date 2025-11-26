@@ -1,0 +1,14 @@
+FROM adoptopenjdk/openjdk11
+MAINTAINER shiva
+ENV MONGODB_HOST localhost
+ENV MONGODB_PORT 27017
+ENV MONGODB_DBNAME test
+ENV MONGODB_USERNAME root
+ENV MONGODB_PASSWORD 123456
+RUN mkdir -p /app/source
+COPY . /app/source
+WORKDIR /app/source
+RUN ./mvnw package
+ARG JAR_FILE=./target/*.jar
+COPY ${JAR_FILE} app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]

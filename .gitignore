@@ -1,0 +1,51 @@
+########################
+# Terraform generated files
+########################
+*.tfstate
+*.tfstate.*
+*.tfvars   # Only ignore if you keep secrets here; otherwise commit env-specific tfvars separately
+
+.terraform/
+.crash.log
+crash.*.log
+*.tfplan
+
+**/datastore-0.0.7.jar
+
+# Automatically managed provider lock file
+# ✅ KEEP THIS FILE in repo for reproducibility
+#!.terraform.lock.hcl
+
+
+########################
+# Python
+########################
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+
+########################
+# VS Code
+########################
+.vscode/
+.history/
+
+########################
+# System / OS junk
+########################
+.DS_Store
+Thumbs.db
+
+
+########################
+# App specific artefacts
+########################
+*.jar           # Ignore built jars (commit only source unless versioned release)
+*.log
+*.bak
+
+# If app deployments create temp or package dirs
+dist/
+build/

@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datastore-frontend
+  labels:
+    type: frontend
+    {{- include "datastore-fe.fullname" . | nindent 4 }}
+  namespace: frontend
+spec:
+  {{- with .Values.datastoreFe }}         
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      type: frontend
+  template:
+    metadata:
+      name: datastore-frontend
+      labels:
+        type: frontend
+    spec:
+      containers:
+        - name: mywebapp
+          image: krishnaurs2022/datastore-frontend:{{ .imageTag }}
+          env:
+            - name: API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: datastore-fe-cm
+                  key: backendEndpoint
+          {{- end }}
+          resources:
+            {{- toYaml .Values.datastoreFe.resources | nindent 12}}
+        {{- with .Values.datastoreFe.healthChecks }}            
+          livenessProbe:
+            {{- toYaml .livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .readinessProbe | nindent 12 }}
+          startupProbe:
+             {{- toYaml .startupProbe | nindent 12}}
+        {{- end }}
+          
+  
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: datastore-frontend-svc
+  namespace: frontend
+spec:
+  ports:
+    - port: 8081
+      targetPort: 8080
+  selector:
+    type: frontend

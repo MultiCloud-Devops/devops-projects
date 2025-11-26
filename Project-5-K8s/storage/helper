@@ -1,0 +1,8 @@
+Pre Requirements
+----------------
+Installing AWS EBS CSI Driver
+-> helm upgrade --install aws-ebs-csi-driver --namespace kube-system aws-ebs-csi-driver/aws-ebs-csi-driver
+
+helm install prometheus prometheus-community/prometheus \
+--namespace monitoring \
+--set alertmanager.persistentVolume.storageClass="ebs-persistent-store"

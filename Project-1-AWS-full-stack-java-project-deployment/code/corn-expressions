@@ -1,0 +1,4 @@
+Cron Expressions
+----------------
+00 6 * * 1-5  -->  Monday to friday 6:00 AM
+30 19 * * 1-5 --> Monday to friday 7:30 PM

@@ -1,0 +1,36 @@
+docker build --platform linux/amd64 -t studentstore .
+
+docker run --name=mongodb -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=testtesttest -d mongo
+cat config.default.js
+docker run --name=mongo-express-test -d -p 8081:8081 -e ME_CONFIG_MONGODB_ADMINUSERNAME=admin -e ME_CONFIG_MONGODB_ADMINPASSWORD=testtest -e ME_CONFIG_MONGODB_SERVER=mongodb --link mongodb:mongoexpress mongo-express
+
+mongosh -u admin -p testtesttest
+show databases
+use studentdb
+db.getUsers()
+
+db.createUser({user: "admin",pwd: "test123",roles: [ "readWrite", "dbAdmin" ]})
+db.dropUser("admin")
+show collections
+db.<collection_name_from_above_output>.find()
+db.student.find()
+
+
+docker run --name=studentstoreapp -d -e MONGODB_HOST=mongodb -e MONGODB_PORT=27017 -e MONGODB_DBNAME=studentdb -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=testtest --link=mongodb:mongg studentstore
+
+docker run --name=studentstoreapp -d -e MONGODB_HOST=mongodb -e MONGODB_PORT=27017 -e MONGODB_DBNAME=studentdb -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=testtest --link mongodb:mongg 8072388539/studentstore:v2.0
+docker run --name=mongodb -e MONGO_INITDB_ROOT_USERNAME=admin -e MONGO_INITDB_ROOT_PASSWORD=testtest -d mongo
+
+
+Docker-compose installation on Ubuntu :
+----------------------------------------------
+sudo apt update && sudo apt upgrade -y
+sudo apt install docker-compose -y
+
+
+Docker-compose installation on Amazon Linux :
+----------------------------------------------
+DOCKER_COMPOSE_VERSION="v2.24.5"
+sudo dnf update -y
+sudo curl -SL "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
