@@ -14,10 +14,10 @@ A curated collection of real-world DevOps and cloud infrastructure projects — 
 | **High-Availability & Resilient Architecture** | Route 53 health-check based failover routing, remote-state management for Terraform stacks, modular multi-stack design — ensuring infrastructure is robust and production-ready. |
 
 ## Architecture Diagrams
-**Cloud project**
+**Cloud Project**
 ![Alt Text](Project-1-AWS-full-stack-java-project-deployment/architecture/datastore-app.jpg)
 
-**Kubernetes project**
+**Kubernetes Project**
 ![Alt Text](Project-5-K8s/architecture/datastore-app.jpg) 
 
 **Lambda Project**
